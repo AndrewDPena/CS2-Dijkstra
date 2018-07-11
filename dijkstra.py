@@ -16,6 +16,7 @@ class weighted_digraph:
         def __init__(self, value):
             self.value = value
             self.edges = []
+            self.distance = 0
 
         def __str__(self):
             result = str(self.value)
@@ -103,18 +104,41 @@ class weighted_digraph:
         return(self.find(value1).is_adjacent(self.find(value2)))
 
     def dijkstra(self, start):
+        for node in self:
+            node.distance = float("inf")
         # for all the nodes
             # set distance to float("inf")
             # set previous to None
 
+        source = self.find(start)
+        source.distance = 0
         # set the source to the find of start
         # set the source distance to 0
 
+        todo = set([source])
         # create a todo set and add the source node
 
+        result = []
         # create an empty result list
-
+        while todo:
         # while there is something todo
+            smallest = None
+            for node in todo:
+                if smallest is None:
+                    smallest = node
+                if smallest.distance > node.distance:
+                    smallest = node
+            todo.remove(smallest)
+
+            result.append([smallest.distance, smallest.value])
+
+            for edge in smallest.edges:
+                new_dist = smallest.distance + edge.weight
+                if new_dist < edge.to_node.distance:
+                    edge.to_node.distance = new_dist
+                    todo.add(edge.to_node)
+
+        return result
             # find the minimum distance node and remove it from todo
 
             # append its distance and value to the result list
@@ -127,7 +151,6 @@ class weighted_digraph:
                     # todo list
 
         # return the result list
-        pass
 
 class test_weighted_digraph(unittest.TestCase):
     def test_empty(self):
