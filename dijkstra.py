@@ -4,7 +4,7 @@ import unittest
 # set to true if you keep track of the previous nodes for solutions
 # B-level is a working Dijkstra's
 # A-level is a working Dijkstra's that tracks previous nodes
-track_previous = False
+track_previous = True
 
 class weighted_digraph:
     class __edge(object):
@@ -16,7 +16,6 @@ class weighted_digraph:
         def __init__(self, value):
             self.value = value
             self.edges = []
-            self.distance = 0
 
         def __str__(self):
             result = str(self.value)
@@ -106,39 +105,46 @@ class weighted_digraph:
     def dijkstra(self, start):
         for node in self:
             node.distance = float("inf")
-        # for all the nodes
-            # set distance to float("inf")
-            # set previous to None
+            node.previous = []
 
         source = self.find(start)
         source.distance = 0
-        # set the source to the find of start
-        # set the source distance to 0
 
-        todo = set([source])
-        # create a todo set and add the source node
-
-        result = []
-        # create an empty result list
+        todo = {source}
+        results = []
         while todo:
-        # while there is something todo
             smallest = None
             for node in todo:
-                if smallest is None:
-                    smallest = node
-                if smallest.distance > node.distance:
+                if smallest is None or smallest.distance > node.distance:
                     smallest = node
             todo.remove(smallest)
 
-            result.append([smallest.distance, smallest.value])
+            temp_list = [smallest.distance, smallest.value]
+            if track_previous:
+                temp_list.extend(smallest.previous)
+
+            results.append(temp_list)
 
             for edge in smallest.edges:
                 new_dist = smallest.distance + edge.weight
                 if new_dist < edge.to_node.distance:
                     edge.to_node.distance = new_dist
+                    edge.to_node.previous = [smallest.value]
+                    edge.to_node.previous.extend(smallest.previous)
                     todo.add(edge.to_node)
 
-        return result
+        return results
+        # for all the nodes
+            # set distance to float("inf")
+            # set previous to None
+
+        # set the source to the find of start
+        # set the source distance to 0
+
+        # create a todo set and add the source node
+        # create an empty result list
+        # while there is something todo
+
             # find the minimum distance node and remove it from todo
 
             # append its distance and value to the result list
