@@ -102,7 +102,7 @@ class weighted_digraph:
     def are_adjacent(self, value1, value2):
         return(self.find(value1).is_adjacent(self.find(value2)))
 
-    def dijkstra(self, start):
+    def dijkstra(self, start, end=None):
         for node in self:
             node.distance = float("inf")
             node.previous = []
@@ -119,11 +119,18 @@ class weighted_digraph:
                     smallest = node
             todo.remove(smallest)
 
-            temp_list = [smallest.distance, smallest.value]
-            if track_previous:
-                temp_list.extend(smallest.previous)
-
-            results.append(temp_list)
+            if not end:
+                temp_list = [smallest.distance, smallest.value]
+                if track_previous:
+                    temp_list.extend(smallest.previous)
+                results.append(temp_list)
+            else:
+                if smallest.value == end:
+                    temp_list = [smallest.distance, smallest.value]
+                    if track_previous:
+                        temp_list.extend(smallest.previous)
+                    results.append(temp_list)
+                    return results
 
             for edge in smallest.edges:
                 new_dist = smallest.distance + edge.weight
@@ -134,29 +141,6 @@ class weighted_digraph:
                     todo.add(edge.to_node)
 
         return results
-        # for all the nodes
-            # set distance to float("inf")
-            # set previous to None
-
-        # set the source to the find of start
-        # set the source distance to 0
-
-        # create a todo set and add the source node
-        # create an empty result list
-        # while there is something todo
-
-            # find the minimum distance node and remove it from todo
-
-            # append its distance and value to the result list
-
-            # for each of the edges in the minimum node
-                # calculate the new distance to the all the adjacent nodes
-                # if the new distance is less than the adjacent node's
-                # existing distance
-                    # update the adjacent node's distance and add it to the
-                    # todo list
-
-        # return the result list
 
 class test_weighted_digraph(unittest.TestCase):
     def test_empty(self):
@@ -251,13 +235,22 @@ class test_weighted_digraph(unittest.TestCase):
             self.assertEqual(g.dijkstra(1), [[0, 1], [1, 3, 1], [2, 2, 1], \
                 [3, 4, 2, 1], [4, 5, 2, 1], [5, 6, 5, 2, 1]])
 
+    def test_end(self):
+        g = weighted_digraph(False)
+        g.add_edges([(1, 2, 2), (1, 3, 1), (2, 3, 1), (2, 4, 1), \
+            (2, 5, 2), (3, 5, 5), (4, 5, 3), (4, 6, 6), (5, 6, 1)])
+        if not track_previous:
+            self.assertEqual(g.dijkstra(1, 6), [[5, 6]])
+        else:
+            self.assertEqual(g.dijkstra(1, 6), [[5, 6, 5, 2, 1]])
+
 if '__main__' == __name__:
     g = weighted_digraph(False)
     file = open(argv[1], "r")
     for line in file:
         a = line.strip().split(" ")
         g.add_edge(a[0], a[1], int(a[2]))
-    result = g.dijkstra("Denver")
+    result = g.dijkstra("Denver", "Omaha")
     for city in result:
         print(city[1], "is", city[0], 'miles from Denver')
         if track_previous:
