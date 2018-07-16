@@ -1,6 +1,9 @@
 from sys import stdin, argv
 import unittest
-
+'''
+Author: Andrew Peña
+Help given to: Kelly Trujillo, Stuart Griffin, Ze Liu
+'''
 # set to true if you keep track of the previous nodes for solutions
 # B-level is a working Dijkstra's
 # A-level is a working Dijkstra's that tracks previous nodes
@@ -105,7 +108,7 @@ class weighted_digraph:
     def dijkstra(self, start, end=None):
         for node in self:
             node.distance = float("inf")
-            node.previous = []
+            node.previous = None
 
         source = self.find(start)
         source.distance = 0
@@ -120,27 +123,32 @@ class weighted_digraph:
             todo.remove(smallest)
 
             if not end:
-                temp_list = [smallest.distance, smallest.value]
-                if track_previous:
-                    temp_list.extend(smallest.previous)
-                results.append(temp_list)
+                results.append(self.__add_results(smallest))
             else:
                 if smallest.value == end:
-                    temp_list = [smallest.distance, smallest.value]
-                    if track_previous:
-                        temp_list.extend(smallest.previous)
-                    results.append(temp_list)
+                    results.append(self.__add_results(smallest))
                     return results
 
             for edge in smallest.edges:
                 new_dist = smallest.distance + edge.weight
                 if new_dist < edge.to_node.distance:
                     edge.to_node.distance = new_dist
-                    edge.to_node.previous = [smallest.value]
-                    edge.to_node.previous.extend(smallest.previous)
+                    edge.to_node.previous = smallest
+                    #edge.to_node.previous.extend(smallest.previous)
                     todo.add(edge.to_node)
 
         return results
+
+    def __add_results(self, node):
+        result = [node.distance, node.value]
+        if track_previous:
+            result.extend(self.__find_previous(node))
+        return result
+
+    def __find_previous(self, node):
+        if node.previous is None:
+            return []
+        return [node.previous.value] + self.__find_previous(node.previous)
 
 class test_weighted_digraph(unittest.TestCase):
     def test_empty(self):
